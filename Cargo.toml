@@ -1,0 +1,8 @@
+[package]
+name = "excel-to-csv"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+calamine = "0.25.0"
+literally = "0.1.3"
