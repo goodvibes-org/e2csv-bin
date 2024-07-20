@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 use translations::return_mapping;
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 enum Source {
     Ingredients,
     Products
@@ -52,10 +52,11 @@ fn main() {
 }
 
 fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) -> std::io::Result<()> {
+    let delim = '~';
     let translations = return_mapping(source);
     for (n,r) in range.into_iter().enumerate() {
         if n == 0 {
-            write!(dest, ",")?;
+            write!(dest, "{}", delim)?;
             let limit = r.len();
             for (a, rowhead) in r.into_iter().enumerate() {
                 match rowhead {
@@ -66,18 +67,26 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
                     _ => write!(dest, "{}", "").unwrap()
                 }
                 if a < limit - 1 {
-                    write!(dest, ",")?
+                    write!(dest, "{}",delim)?
                 }
             }
-            write!(dest, "\n")?;
+            write!(dest, "\r\n")?;
 
         } else {
-        let elem = format!("{},", n - 1 );
+            if n <= 10 && source == Source::Ingredients {
+                println!("{:?}", r)
+            }
+        let elem = format!("{}{}", n - 1, delim );
         write!(dest, "{}", &elem)?;
 
         for c in r.into_iter() {
             match *c {
                 Data::Empty => Ok(()),
+                Data::String(ref s) if s.contains("\"") => {
+                    // println!("string contains comilla de archivo {:?} {}", source, s);
+                    write!(dest, "{}", s)
+                }
+                
                 Data::String(ref s) | Data::DateTimeIso(ref s) | Data::DurationIso(ref s) => {
                     write!(dest, "{}", s)
                 }
@@ -87,7 +96,7 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
                 Data::Error(ref e) => write!(dest, "{:?}", e),
                 Data::Bool(ref b) => write!(dest, "{}", b),
             }?;
-            write!(dest, ",")?
+            write!(dest, "{}", delim)?
         }
         write!(dest, "\n")?;
     }
@@ -115,6 +124,11 @@ fn process_product_files(range: &Range<Data>) -> (Vec<Vec<&Data>>, Vec<Vec<&Data
                     h if h.eq("") => (),
                     _ => row_others.push(body),
                 };
+                match (body.clone()) {
+                    Data::String(text) if text.contains("\"") => println!("texto contiene este string {}", text),
+                    Data::String(text) => (),
+                    _ => ()
+                }
             }
             vec_ingredients.push(row_ingredients);
             vec_others.push(row_others);
