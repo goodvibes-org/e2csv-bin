@@ -107,6 +107,10 @@ fn process_product_files(range: &Range<Data>) -> (Vec<Vec<&Data>>, Vec<Vec<&Data
             }
             for (header, body) in headers.clone().into_iter().zip(r) {
                 match header {
+                    h if h.eq("Descripcion") => {
+                        row_ingredients.push(body);
+                        row_others.push(body);
+                    }
                     h if h.contains("Ingredient ") => row_ingredients.push(body),
                     h if h.eq("") => (),
                     _ => row_others.push(body),
