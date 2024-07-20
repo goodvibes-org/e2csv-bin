@@ -13,6 +13,7 @@ enum Source {
 }
 
 
+
 fn main() {
     // converts first argument into a csv (same name, silently overrides
     // if the file already exists
@@ -28,7 +29,6 @@ fn main() {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => (),
         _ => panic!("Expecting an excel file"),
     }
-    let folders = std::fs::read_dir(".").unwrap().for_each(|entry| println!("{:?}", entry.unwrap()));
 
     let dest_productos = PathBuf::from("bpc_productos_proc").with_extension("csv");
     let dest_ingredientes_productos = PathBuf::from("bpc_productos_proc_ingredientes").with_extension("csv");
@@ -55,6 +55,7 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
     let translations = return_mapping(source);
     for (n,r) in range.into_iter().enumerate() {
         if n == 0 {
+            write!(dest, ",")?;
             for rowhead in r.into_iter() {
                 match rowhead {
                     Data::String(s) => {
@@ -63,9 +64,12 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
                     }
                     _ => write!(dest, "{}", "").unwrap()
                 }
-                write!(dest, ";")?
+                write!(dest, ",")?
             }
         } else {
+        let elem = format!("{},", n - 2 );
+        write!(dest, "{}", &elem)?;
+
         for c in r.into_iter() {
             match *c {
                 Data::Empty => Ok(()),
@@ -90,9 +94,10 @@ fn process_product_files(range: &Range<Data>) -> (Vec<Vec<&Data>>, Vec<Vec<&Data
     let headers = range.headers().unwrap();
     let mut vec_ingredients = vec![];
     let mut vec_others = vec![];
-    for r in range.rows() {
+    for (n,r) in range.rows().enumerate() {
             let mut row_ingredients = vec![];
             let mut row_others = vec![];
+            
             for (header, body) in headers.clone().into_iter().zip(r) {
                 match header {
                     h if h.contains("Ingredient ") => row_ingredients.push(body),
