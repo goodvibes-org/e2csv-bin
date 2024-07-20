@@ -32,7 +32,7 @@ fn main() {
 
     let dest_productos = PathBuf::from("bpc_productos_proc").with_extension("csv");
     let dest_ingredientes_productos = PathBuf::from("bpc_productos_proc_ingredientes").with_extension("csv");
-    let dest_ingredientes = PathBuf::from("bpc_ingredientes").with_extension("csv");
+    let dest_ingredientes = PathBuf::from("bpc_ingredientes_proc").with_extension("csv");
     let mut dest_productos = BufWriter::new(File::create(dest_productos).unwrap());
     let mut dest_ingredientes_productos = BufWriter::new(File::create(dest_ingredientes_productos).unwrap());
     let mut dest_ingredientes = BufWriter::new(File::create(dest_ingredientes).unwrap());
@@ -56,7 +56,8 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
     for (n,r) in range.into_iter().enumerate() {
         if n == 0 {
             write!(dest, ",")?;
-            for rowhead in r.into_iter() {
+            let limit = r.len();
+            for (a, rowhead) in r.into_iter().enumerate() {
                 match rowhead {
                     Data::String(s) => {
                         let tra = translations.get(s).unwrap();
@@ -64,10 +65,14 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
                     }
                     _ => write!(dest, "{}", "").unwrap()
                 }
-                write!(dest, ",")?
+                if a < limit - 1 {
+                    write!(dest, ",")?
+                }
             }
+            write!(dest, "\n")?;
+
         } else {
-        let elem = format!("{},", n - 2 );
+        let elem = format!("{},", n - 1 );
         write!(dest, "{}", &elem)?;
 
         for c in r.into_iter() {
@@ -82,9 +87,9 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
                 Data::Error(ref e) => write!(dest, "{:?}", e),
                 Data::Bool(ref b) => write!(dest, "{}", b),
             }?;
-            write!(dest, ";")?
+            write!(dest, ",")?
         }
-        write!(dest, "\r\n")?;
+        write!(dest, "\n")?;
     }
 }
     Ok(())
@@ -97,10 +102,13 @@ fn process_product_files(range: &Range<Data>) -> (Vec<Vec<&Data>>, Vec<Vec<&Data
     for (n,r) in range.rows().enumerate() {
             let mut row_ingredients = vec![];
             let mut row_others = vec![];
-            
+            if n == 0 {
+                println!("{:?}", headers);
+            }
             for (header, body) in headers.clone().into_iter().zip(r) {
                 match header {
                     h if h.contains("Ingredient ") => row_ingredients.push(body),
+                    h if h.eq("") => (),
                     _ => row_others.push(body),
                 };
             }
