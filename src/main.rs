@@ -55,6 +55,7 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
     let delim = '~';
     let translations = return_mapping(source);
     for (n,r) in range.into_iter().enumerate() {
+        let limit = r.len() - 1 ;
         if n == 0 {
            
             write!(dest, " {}", delim)?;
@@ -67,8 +68,9 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
                     }
                     _ => write!(dest, "{}", "").unwrap()
                 }
-                
+                if a < limit {
                     write!(dest, "{}", delim)?
+                }
                 
                
             }
@@ -82,7 +84,7 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
             for (a, c) in r.into_iter().enumerate() {
                 if n.eq(&8) && source.eq(&Source::Ingredients){
                     // println!("source {:?}",source );
-                    println!("{:?}",c)
+                    // println!("{:?}",c)
                 }
                 match *c {
                     Data::Empty => write!(dest, ""),
@@ -96,7 +98,7 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
                             st = st.split_at_checked(20).unwrap_or(("CORTADOOO", "CORTADOOO")).0.to_owned();
                             // st.insert(0, '"');
                             // st.extend(["\""]);
-                            println!("len {}",st.len());
+                            // println!("len {}",st.len());
                             write!(dest,"{}", st)
                         } else {
                             write!(dest,"{}", s)
@@ -108,10 +110,13 @@ fn write_range<W: Write>(dest: &mut W, range: Vec<Vec<&Data>>, source : Source) 
                     Data::Error(ref e) => write!(dest, "{:?}", f32::NAN),
                     Data::Bool(ref b) => write!(dest, "{}", b),
                 }?;
+                if a < limit {
                     write!(dest, "{}", delim)?
+                }
             }
             
         }
+
         write!(dest, "\n")?;
 }
     Ok(())
@@ -135,7 +140,12 @@ fn process_product_files(range: &Range<Data>) -> (Vec<Vec<&Data>>, Vec<Vec<&Data
                     }
                     h if h.contains("Ingredient ") => row_ingredients.push(body),
                     h if h.eq("") => (),
-                    _ => row_others.push(body),
+                    _ => {
+                        if n < 10 {
+                            println!("Header: {}\nBody: {}", header, body)
+                        }
+                        row_others.push(body)
+                    },
                 };
             }
             vec_ingredients.push(row_ingredients);
