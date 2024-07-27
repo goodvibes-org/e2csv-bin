@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::Source;
 
-pub fn return_mapping(source : Source) -> HashMap<String, String> {
+pub fn return_mapping(source: Source) -> HashMap<String, String> {
     let product_mapping: HashMap<String, String> = hmap! {"Codigo"=> "codigo",
     "Descripcion"=> "descripcion",
     "presentacion"=> "presentacion",
@@ -119,7 +119,7 @@ pub fn return_mapping(source : Source) -> HashMap<String, String> {
     "Env.Risk"=> "env_risk",
     "Total.Risk"=> "total_risk"};
     return match source {
-	Source::Ingredients => ingredient_mapping,
-	Source::Products => product_mapping
+        Source::Ingredients => ingredient_mapping,
+        Source::Products => product_mapping,
     };
 }
