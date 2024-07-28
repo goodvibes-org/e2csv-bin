@@ -11,11 +11,16 @@ pub enum Source {
     Products,
 }
 
-fn main() {
+fn main(
+    file_productos: &str,
+    file_ingredientes: &str,
+    sheet_productos: &str,
+    sheet_ingredientes: &str,
+) {
     // converts first argument into a csv (same name, silently overrides
     // if the file already exists
-    let file_productos = "BPC_Productos (1).xlsx";
-    let file_ingredientes = "BPC_Ingredientes.xlsx";
+    let file_productos = file_productos;
+    let file_ingredientes = file_ingredientes;
     let sce_prod = PathBuf::from(file_productos);
     let sce_ing = PathBuf::from(file_ingredientes);
     match sce_prod.extension().and_then(|s| s.to_str()) {
@@ -28,6 +33,7 @@ fn main() {
     }
 
     let dest_productos = PathBuf::from("bpc_productos_proc").with_extension("csv");
+    println!("{}", dest_productos.display());
     let dest_ingredientes_productos =
         PathBuf::from("bpc_productos_proc_ingredientes").with_extension("csv");
     let dest_ingredientes = PathBuf::from("bpc_ingredientes_proc").with_extension("csv");
@@ -37,9 +43,9 @@ fn main() {
     let mut dest_ingredientes = BufWriter::new(File::create(dest_ingredientes).unwrap());
 
     let mut xl = open_workbook_auto(&sce_prod).unwrap();
-    let range = xl.worksheet_range("Productos").unwrap();
+    let range = xl.worksheet_range(sheet_productos).unwrap();
     let mut xl = open_workbook_auto(&sce_ing).unwrap();
-    let range_ing = xl.worksheet_range("Ingredientes_Formatted_V1").unwrap();
+    let range_ing = xl.worksheet_range(sheet_ingredientes).unwrap();
 
     // write_range(&mut dest, &range).unwrap();
     let (productos_ingredientes, productos) = process_product_files(&range);
