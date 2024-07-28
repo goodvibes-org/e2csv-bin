@@ -1,26 +1,23 @@
 pub mod translations;
 use calamine::{open_workbook_auto, Data, Range, Reader};
+use std::env::args;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use translations::return_mapping;
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Source {
     Ingredients,
     Products,
 }
 
-fn main(
-    file_productos: &str,
-    file_ingredientes: &str,
-    sheet_productos: &str,
-    sheet_ingredientes: &str,
-) {
+fn main() {
     // converts first argument into a csv (same name, silently overrides
     // if the file already exists
-    let file_productos = file_productos;
-    let file_ingredientes = file_ingredientes;
+    let file_productos = args().nth(1).expect("Ingresar archivo de productos");
+    let file_ingredientes = args().nth(2).expect("Ingresar archivo de Ingredientes");
+    let sheet_productos = args().nth(3).expect("Ingresar sheet de productos");
+    let sheet_ingredientes = args().nth(4).expect("Ingresar sheet de ingredientes");
     let sce_prod = PathBuf::from(file_productos);
     let sce_ing = PathBuf::from(file_ingredientes);
     match sce_prod.extension().and_then(|s| s.to_str()) {
