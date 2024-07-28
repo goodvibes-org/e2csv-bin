@@ -40,9 +40,9 @@ fn main() {
     let mut dest_ingredientes = BufWriter::new(File::create(dest_ingredientes).unwrap());
 
     let mut xl = open_workbook_auto(&sce_prod).unwrap();
-    let range = xl.worksheet_range(sheet_productos).unwrap();
+    let range = xl.worksheet_range(&sheet_productos).unwrap();
     let mut xl = open_workbook_auto(&sce_ing).unwrap();
-    let range_ing = xl.worksheet_range(sheet_ingredientes).unwrap();
+    let range_ing = xl.worksheet_range(&sheet_ingredientes).unwrap();
 
     // write_range(&mut dest, &range).unwrap();
     let (productos_ingredientes, productos) = process_product_files(&range);
