@@ -30,10 +30,16 @@ fn main() {
     }
 
     let dest_productos = PathBuf::from("bpc_productos_proc").with_extension("csv");
-    println!("{}", dest_productos.display());
+
     let dest_ingredientes_productos =
         PathBuf::from("bpc_productos_proc_ingredientes").with_extension("csv");
     let dest_ingredientes = PathBuf::from("bpc_ingredientes_proc").with_extension("csv");
+    println!(
+        "{}\n{}\n{}\n",
+        dest_productos.display(),
+        dest_ingredientes.display(),
+        dest_ingredientes_productos.display()
+    );
     let mut dest_productos = BufWriter::new(File::create(dest_productos).unwrap());
     let mut dest_ingredientes_productos =
         BufWriter::new(File::create(dest_ingredientes_productos).unwrap());
