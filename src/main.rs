@@ -12,6 +12,7 @@ pub enum Source {
 }
 
 fn main() {
+    println!("running...");
     // converts first argument into a csv (same name, silently overrides
     // if the file already exists
     let file_productos = args().nth(1).expect("Ingresar archivo de productos");
@@ -35,7 +36,7 @@ fn main() {
         PathBuf::from("bpc_productos_proc_ingredientes").with_extension("csv");
     let dest_ingredientes = PathBuf::from("bpc_ingredientes_proc").with_extension("csv");
     println!(
-        "{}\n{}\n{}\n",
+        "running...\n{}\n{}\n{}\n",
         dest_productos.display(),
         dest_ingredientes.display(),
         dest_ingredientes_productos.display()
