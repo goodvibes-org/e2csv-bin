@@ -5,20 +5,59 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use translations::return_mapping;
+
+use clap::Parser;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Source {
     Ingredients,
     Products,
 }
 
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Name of the person to greet
+    #[arg(short, long)]
+    solares: Option<String>,
+    #[arg(short, long)]
+    bpc: Option<String>,
+    #[arg(short, long)]
+    ingredientes: String,
+
+    #[arg(short='x', long)]
+    products_sheet: String,
+    #[arg(short='y', long)]
+    ingredients_sheet: String,
+    /// Number of times to greet
+    #[arg(short, long, default_value_t = 1)]
+    count: u8,
+}
+
+#[derive(Debug)]
+enum Cat  {
+    BPC,
+    Solares
+} 
+
+
+
 fn main() {
     println!("running...");
     // converts first argument into a csv (same name, silently overrides
     // if the file already exists
-    let file_productos = args().nth(1).expect("Ingresar archivo de productos");
-    let file_ingredientes = args().nth(2).expect("Ingresar archivo de Ingredientes");
-    let sheet_productos = args().nth(3).expect("Ingresar sheet de productos");
-    let sheet_ingredientes = args().nth(4).expect("Ingresar sheet de ingredientes");
+    let clap_args = dbg!(Args::parse());
+    let (file_productos, file_ingredientes, sheet_productos, sheet_ingredientes, source) = match clap_args.solares {
+        Some(inner) => (inner, clap_args.ingredientes, clap_args.products_sheet, clap_args.ingredients_sheet, Cat::Solares ),
+        None => match clap_args.bpc {
+            Some(inner) => (inner, clap_args.ingredientes, clap_args.products_sheet, clap_args.ingredients_sheet, Cat::BPC),
+            None => panic!("No se ha indicado ninguna referencia de productos")
+            
+        }
+        
+    };
+
     let sce_prod = PathBuf::from(file_productos);
     let sce_ing = PathBuf::from(file_ingredientes);
     match sce_prod.extension().and_then(|s| s.to_str()) {
@@ -30,7 +69,12 @@ fn main() {
         _ => panic!("Expecting an excel file"),
     }
 
-    let dest_productos = PathBuf::from("bpc_productos_proc").with_extension("csv");
+    let dest_productos = match source {
+        Cat::BPC =>     PathBuf::from("bpc_productos_proc").with_extension("csv"),
+        Cat::Solares =>     PathBuf::from("solares_productos_proc").with_extension("csv")
+        
+    }; 
+
 
     let dest_ingredientes_productos =
         PathBuf::from("bpc_productos_proc_ingredientes").with_extension("csv");
