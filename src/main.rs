@@ -57,7 +57,7 @@ fn main() {
         }
         
     };
-
+    println!("{}", file_productos);
     let sce_prod = PathBuf::from(file_productos);
     let sce_ing = PathBuf::from(file_ingredientes);
     match sce_prod.extension().and_then(|s| s.to_str()) {
