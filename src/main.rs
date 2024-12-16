@@ -99,7 +99,7 @@ fn main() {
         write!(&log_writer,"Los dos archivos existen\n").unwrap()
     } else {
         write!(&log_writer,"sce prod {} sce prod{}\n",sce_prod.exists(), sce_ing.exists()).unwrap();
-        write!(&log_writer, "{:?}", read_dir(".") ).unwrap();
+        write!(&log_writer, "yo por si acaso writeo aca tambien a ver si no son los files que bo andan\n{:?}", read_dir(".") ).unwrap();
     }
 
     let mut xl = open_workbook_auto(&sce_prod).unwrap();
