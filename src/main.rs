@@ -69,7 +69,10 @@ fn main() {
     let sce_ing = PathBuf::from(file_ingredientes);
     match sce_prod.extension().and_then(|s| s.to_str()) {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => (),
-        _ => panic!("Expecting an excel file"),
+        _ => {
+            println!("called con {:?}", sce_prod);
+            panic!("Expecting an excel file")
+        },
     }
     match sce_ing.extension().and_then(|s| s.to_str()) {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => (),
