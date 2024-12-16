@@ -3,6 +3,7 @@ use calamine::{open_workbook_auto, Data, Range, Reader};
 use std::env::args;
 use std::fs::File;
 use std::io::{BufWriter, Write};
+
 use std::path::PathBuf;
 use translations::return_mapping;
 
@@ -57,8 +58,10 @@ fn main() {
         }
         
     };
-    println!("{}", file_productos);
+    println!("{:#?}", file_productos);
+    println!("inline {} inline", file_productos);
     let sce_prod = PathBuf::from(file_productos);
+    println!("{:#?}", sce_prod);
     let sce_ing = PathBuf::from(file_ingredientes);
     match sce_prod.extension().and_then(|s| s.to_str()) {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => (),
@@ -89,6 +92,11 @@ fn main() {
     let mut dest_ingredientes_productos =
         BufWriter::new(File::create(dest_ingredientes_productos).unwrap());
     let mut dest_ingredientes = BufWriter::new(File::create(dest_ingredientes).unwrap());
+    if sce_prod.exists() && sce_ing.exists() {
+        eprintln!("Los dos archivos existen")
+    } else {
+        eprintln!("sce prod {} sce prod{}",sce_prod.exists(), sce_ing.exists())
+    }
 
     let mut xl = open_workbook_auto(&sce_prod).unwrap();
     let range = xl.worksheet_range(&sheet_productos).unwrap();
