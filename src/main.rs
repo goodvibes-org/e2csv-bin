@@ -1,6 +1,7 @@
 pub mod translations;
 use calamine::{open_workbook_auto, Data, Range, Reader};
 use std::env::args;
+use std::fmt::format;
 use std::fs;
 use std::fs::read_dir;
 use std::fs::File;
@@ -99,7 +100,8 @@ fn main() {
         write!(&log_writer,"Los dos archivos existen\n").unwrap()
     } else {
         write!(&log_writer,"sce prod {} sce prod{}\n",sce_prod.exists(), sce_ing.exists()).unwrap();
-        write!(&log_writer, "yo por si acaso writeo aca tambien a ver si no son los files que bo andan\n{:?}", read_dir(".") ).unwrap();
+        let folder = read_dir(".").unwrap().into_iter().map(|node| format!("{:?}", node)).collect::<String>();
+        write!(&log_writer, "yo por si acaso writeo aca tambien a ver si no son los files que bo andan\n{:?}", folder  ).unwrap();
     }
 
     let mut xl = open_workbook_auto(&sce_prod).unwrap();
