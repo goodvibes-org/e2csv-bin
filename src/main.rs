@@ -1,6 +1,7 @@
 pub mod translations;
 use calamine::{open_workbook_auto, Data, Range, Reader};
 use std::env::args;
+use std::fs;
 use std::fs::read_dir;
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -47,6 +48,7 @@ enum Cat  {
 
 fn main() {
     println!("running...");
+    let mut log_writer = fs::OpenOptions::new().create(true).append(true).write(true).open("./logs.txt").unwrap();
     // converts first argument into a csv (same name, silently overrides
     // if the file already exists
     let clap_args = dbg!(Args::parse());
@@ -94,10 +96,10 @@ fn main() {
         BufWriter::new(File::create(dest_ingredientes_productos).unwrap());
     let mut dest_ingredientes = BufWriter::new(File::create(dest_ingredientes).unwrap());
     if sce_prod.exists() && sce_ing.exists() {
-        eprintln!("Los dos archivos existen")
+        write!(&log_writer,"Los dos archivos existen\n").unwrap()
     } else {
-        eprintln!("sce prod {} sce prod{}",sce_prod.exists(), sce_ing.exists());
-        eprintln!("{:?}", read_dir(".") )
+        write!(&log_writer,"sce prod {} sce prod{}\n",sce_prod.exists(), sce_ing.exists()).unwrap();
+        write!(&log_writer, "{:?}", read_dir(".") ).unwrap();
     }
 
     let mut xl = open_workbook_auto(&sce_prod).unwrap();
