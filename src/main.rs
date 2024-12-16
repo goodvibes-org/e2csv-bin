@@ -1,6 +1,7 @@
 pub mod translations;
 use calamine::{open_workbook_auto, Data, Range, Reader};
 use std::env::args;
+use std::fs::read_dir;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
@@ -95,7 +96,8 @@ fn main() {
     if sce_prod.exists() && sce_ing.exists() {
         eprintln!("Los dos archivos existen")
     } else {
-        eprintln!("sce prod {} sce prod{}",sce_prod.exists(), sce_ing.exists())
+        eprintln!("sce prod {} sce prod{}",sce_prod.exists(), sce_ing.exists());
+        eprintln!("{:?}", read_dir(".") )
     }
 
     let mut xl = open_workbook_auto(&sce_prod).unwrap();
