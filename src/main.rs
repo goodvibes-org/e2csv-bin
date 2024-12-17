@@ -70,7 +70,7 @@ fn main() {
     match sce_prod.extension().and_then(|s| s.to_str()) {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => (),
         _ => {
-            println!("called con {:?}", sce_prod);
+            eprintln!("called con a{:?}a", sce_prod);
             panic!("Expecting an excel file")
         },
     }
@@ -100,14 +100,19 @@ fn main() {
         BufWriter::new(File::create(dest_ingredientes_productos).unwrap());
     let mut dest_ingredientes = BufWriter::new(File::create(dest_ingredientes).unwrap());
     if sce_prod.exists() && sce_ing.exists() {
-        write!(&log_writer,"Los dos archivos existen\n").unwrap()
+        write!(&mut log_writer,"Los dos archivos existen\n").unwrap()
     } else {
-        write!(&log_writer,"sce prod {} sce prod{}\n",sce_prod.exists(), sce_ing.exists()).unwrap();
+        write!(&mut log_writer,"sce prod {} sce prod{}\n",sce_prod.exists(), sce_ing.exists()).unwrap();
         let folder = read_dir(".").unwrap().into_iter().map(|node| format!("{:?}", node)).collect::<String>();
-        write!(&log_writer, "yo por si acaso writeo aca tambien a ver si no son los files que bo andan\n{:?}", folder  ).unwrap();
+        write!(&mut log_writer, "yo por si acaso writeo aca tambien a ver si no son los files que bo andan\n{:?}", folder  ).unwrap();
     }
 
-    let mut xl = open_workbook_auto(&sce_prod).unwrap();
+    let mut xl = open_workbook_auto(&sce_prod).inspect_err(|e| {
+        let dir = sce_prod.ancestors().into_iter().map(|anc| anc.to_str().unwrap()).collect::<Vec<&str>>();
+        eprintln!("Entre en el error en e2csv, con sce {}, con el directorio {:?} ", sce_prod.to_string_lossy(), dir );
+        write!(&mut log_writer,"Entre en el error en e2csv, con sce {}, con el directorio {:?} ", sce_prod.to_string_lossy(), dir ).unwrap();
+
+    }).unwrap();
     let range = xl.worksheet_range(&sheet_productos).unwrap();
     let mut xl = open_workbook_auto(&sce_ing).unwrap();
     let range_ing = xl.worksheet_range(&sheet_ingredientes).unwrap();
