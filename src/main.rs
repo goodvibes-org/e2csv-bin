@@ -64,9 +64,9 @@ fn main() {
     };
     println!("{:#?}", file_productos);
     println!("inline {} inline", file_productos);
-    let sce_prod = PathBuf::from(file_productos);
+    let sce_prod = PathBuf::from(file_productos.trim());
     println!("{:#?}", sce_prod);
-    let sce_ing = PathBuf::from(file_ingredientes);
+    let sce_ing = PathBuf::from(file_ingredientes.trim());
     match sce_prod.extension().and_then(|s| s.to_str()) {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => (),
         _ => {
