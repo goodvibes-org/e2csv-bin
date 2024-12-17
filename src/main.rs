@@ -49,7 +49,6 @@ enum Cat  {
 
 fn main() {
     println!("running...");
-    let mut log_writer = fs::OpenOptions::new().create(true).append(true).write(true).open("./logs.txt").unwrap();
     // converts first argument into a csv (same name, silently overrides
     // if the file already exists
     let clap_args = dbg!(Args::parse());
@@ -62,17 +61,11 @@ fn main() {
         }
         
     };
-    println!("{:#?}", file_productos);
-    println!("inline {} inline", file_productos);
     let sce_prod = PathBuf::from(file_productos.trim());
-    println!("{:#?}", sce_prod);
     let sce_ing = PathBuf::from(file_ingredientes.trim());
     match sce_prod.extension().and_then(|s| s.to_str()) {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => (),
-        _ => {
-            eprintln!("called con a{:?}a", sce_prod);
-            panic!("Expecting an excel file")
-        },
+        _ => panic!("Expecting an excel file"),
     }
     match sce_ing.extension().and_then(|s| s.to_str()) {
         Some("xlsx") | Some("xlsm") | Some("xlsb") | Some("xls") => (),
@@ -99,19 +92,10 @@ fn main() {
     let mut dest_ingredientes_productos =
         BufWriter::new(File::create(dest_ingredientes_productos).unwrap());
     let mut dest_ingredientes = BufWriter::new(File::create(dest_ingredientes).unwrap());
-    if sce_prod.exists() && sce_ing.exists() {
-        write!(&mut log_writer,"Los dos archivos existen\n").unwrap()
-    } else {
-        write!(&mut log_writer,"sce prod {} sce prod{}\n",sce_prod.exists(), sce_ing.exists()).unwrap();
-        let folder = read_dir(".").unwrap().into_iter().map(|node| format!("{:?}", node)).collect::<String>();
-        write!(&mut log_writer, "yo por si acaso writeo aca tambien a ver si no son los files que bo andan\n{:?}", folder  ).unwrap();
-    }
 
     let mut xl = open_workbook_auto(&sce_prod).inspect_err(|e| {
         let dir = sce_prod.ancestors().into_iter().map(|anc| anc.to_str().unwrap()).collect::<Vec<&str>>();
-        eprintln!("Entre en el error en e2csv, con sce {}, con el directorio {:?} ", sce_prod.to_string_lossy(), dir );
-        write!(&mut log_writer,"Entre en el error en e2csv, con sce {}, con el directorio {:?} ", sce_prod.to_string_lossy(), dir ).unwrap();
-
+        eprintln!("Entre en el error en e2csv, con sce {}, con el directorio {:?} ", sce_prod.to_string_lossy(), dir )
     }).unwrap();
     let range = xl.worksheet_range(&sheet_productos).unwrap();
     let mut xl = open_workbook_auto(&sce_ing).unwrap();
