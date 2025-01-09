@@ -29,7 +29,7 @@ struct Args {
     productos: String,
     #[arg(short, long)]
     ingredientes: String,
-    #[arg(short='x', long, default_value = "Products")]
+    #[arg(short='x', long, default_value = "Productos")]
     products_sheet: String,
     #[arg(short='y', long, default_value = "Ingredientes_Formatted_V1")]
     ingredients_sheet: String,
