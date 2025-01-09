@@ -19,31 +19,31 @@ pub enum Source {
 }
 
 
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Name of the person to greet
+    #[command(subcommand)]
+    command: Commands,
     #[arg(short, long)]
-    solares: Option<String>,
-    #[arg(short, long)]
-    bpc: Option<String>,
+    productos: String,
     #[arg(short, long)]
     ingredientes: String,
-
-    #[arg(short='x', long)]
+    #[arg(short='x', long, default_value = "Products")]
     products_sheet: String,
-    #[arg(short='y', long)]
+    #[arg(short='y', long, default_value = "Ingredientes_Formatted_V1")]
     ingredients_sheet: String,
     /// Number of times to greet
     #[arg(short, long, default_value_t = 1)]
     count: u8,
 }
-
-#[derive(Debug)]
-enum Cat  {
+#[derive(Debug, clap::Subcommand)] 
+enum Commands {
     BPC,
-    Solares
-} 
+    Solares,
+    Home
+}
+
 
 
 
@@ -51,16 +51,15 @@ fn main() {
     println!("running...");
     // converts first argument into a csv (same name, silently overrides
     // if the file already exists
-    let clap_args = dbg!(Args::parse());
-    let (file_productos, file_ingredientes, sheet_productos, sheet_ingredientes, source) = match clap_args.solares {
-        Some(inner) => (inner, clap_args.ingredientes, clap_args.products_sheet, clap_args.ingredients_sheet, Cat::Solares ),
-        None => match clap_args.bpc {
-            Some(inner) => (inner, clap_args.ingredientes, clap_args.products_sheet, clap_args.ingredients_sheet, Cat::BPC),
-            None => panic!("No se ha indicado ninguna referencia de productos")
-            
-        }
-        
-    };
+    let clap_args = Args::parse();
+    println!("{:?}", clap_args);
+    let file_productos = clap_args.productos;
+    let file_ingredientes = clap_args.ingredientes;
+    let sheet_ingredientes = clap_args.ingredients_sheet;
+    let sheet_productos = clap_args.products_sheet;
+    let source = clap_args.command;
+    println!("{:?}", source);
+
     let sce_prod = PathBuf::from(file_productos.trim());
     let sce_ing = PathBuf::from(file_ingredientes.trim());
     match sce_prod.extension().and_then(|s| s.to_str()) {
@@ -73,8 +72,9 @@ fn main() {
     }
 
     let dest_productos = match source {
-        Cat::BPC =>     PathBuf::from("bpc_productos_proc").with_extension("csv"),
-        Cat::Solares =>     PathBuf::from("solares_productos_proc").with_extension("csv")
+        Commands::BPC =>     PathBuf::from("bpc_productos_proc").with_extension("csv"),
+        Commands::Solares =>     PathBuf::from("solares_productos_proc").with_extension("csv"),
+        Commands::Home => PathBuf::from("home_productos_proc").with_extension("csv")
         
     }; 
 
