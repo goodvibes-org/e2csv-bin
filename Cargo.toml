@@ -1,5 +1,5 @@
 [package]
-name = "excel-to-csv"
+name = "parsegv"
 version = "0.1.0"
 edition = "2021"
 
