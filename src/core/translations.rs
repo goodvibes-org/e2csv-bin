@@ -2,12 +2,57 @@ use literally::hmap;
 use std::collections::HashMap;
 
 use crate::Source;
-
+pub fn return_foods_mapping(source: Source) -> HashMap<String, String> {
+    let product_mapping: HashMap<String, String> = hmap! {
+                "Nombre" => "nombre",
+                "Valor.Energetico.Kcal"=> "calorias",
+                "Proteinas.g"=> "proteinas_g",
+                "Fibra.g"=> "fibra_g",
+                "VitaminaA.mcg"=> "vitamina_a_mcg",
+                "Potasio.mg"=> "potasio_mg",
+                "Calcio.mg"=> "calcio_mg",
+                "Hierro.mg"=> "hierro_mg",
+                "Fosforo.mg"=> "fosforo_mg",
+                "Magnesio.mg"=> "magnesio_mg",
+                "Sodio.mg"=> "sodio_mg",
+                "Carbohidratos.g"=> "carbohidratos_g",
+                "GrasasTotales.g"=> "grasas_totales_g",
+                "GrasasSaturadas.g"=> "grasas_saturadas_g",
+                "GrasasTrans.g"=> "grasas_trans_g",
+                "Colesterol.mg"=> "colesterol_mg",
+                "GranosEnteros.g"=> "granos_enteros_g",
+                "Verduras.g"=> "verduras_g",
+                "Frutas.g"=> "frutas_g",
+                "Lacteos.g"=> "lacteos_g",
+                "FrutosSecosSemillas.g"=> "frutos_secos_semillas_g",
+                "Fluor.mg"=> "fluor_mg",
+                "GrasasMonoinsaturadas.g"=> "grasas_monoinsaturadas_g",
+                "GrasasPoliinsaturadas.g"=> "grasas_poliinsaturadas_g",
+                "Azucares.g"=> "azucares_g"
+    };
+    let ingredient_mapping: HashMap<String, String> = hmap! {"Source" =>"source",
+        "Name" =>"name",
+        "DDR." =>"ddr",
+        "Toxicity (aditivos-alimentarios.com)" =>"toxicity_a",
+        "Toxicity (wiki)" =>"toxicity_a",
+        "General Description" =>"description",
+        "Descripcion JEFCA" =>"jefca_description",
+        "Posibles efectos adversos" =>"side_effects"
+        ,"ADI (admisible diary intake)" =>"adi",
+        "InfoToReport" =>"info_to_report",
+        "Referencias" =>"references",
+        "Observaciones" =>"observations"
+    };
+    return match source {
+        Source::Ingredients => ingredient_mapping,
+        Source::Products => product_mapping,
+    };
+}
 pub fn return_mapping(source: Source) -> HashMap<String, String> {
     let product_mapping: HashMap<String, String> = hmap! {"Codigo"=> "codigo",
     "Descripcion"=> "descripcion",
     "presentacion"=> "presentacion",
-    "Rubro"=> "rubro_id",
+    "Rubro" => "rubro_id",
     "Observaciones"=> "observaciones",
     "Numero_Ingredientes"=> "numero_ingredientes",
     "Ingredient 1"=> "ingredient 1",
