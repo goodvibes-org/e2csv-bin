@@ -158,7 +158,7 @@ pub(crate) fn process_food_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>
         for (header, body) in headers.clone().into_iter().zip(r) {
             let body = body.clone();
             match header {
-                h if h.eq("Name") => {
+                h if h.eq("Descripcion") => {
                     row_ingredients.push(body.clone());
                     row_others.push(body);
                 }
@@ -208,9 +208,19 @@ pub(crate) fn convert_files(
         Cat::Foods => PathBuf::from("foods_productos_proc").with_extension(".csv"),
     };
 
-    let dest_ingredientes_productos =
-        PathBuf::from("bpc_productos_proc_ingredientes").with_extension("csv");
-    let dest_ingredientes = PathBuf::from("bpc_ingredientes_proc").with_extension("csv");
+    let dest_ingredientes_productos = match source {
+        Cat::BPC => PathBuf::from("bpc_productos_proc_ingredientes").with_extension("csv"),
+        Cat::Home => PathBuf::from("home_productos_proc_ingredientes").with_extension("csv"),
+        Cat::Solares => PathBuf::from("solares_productos_proc_ingredientes").with_extension("csv"),
+        Cat::Foods => PathBuf::from("foods_productos_proc_ingredientes").with_extension("csv"),
+        
+    };
+    let dest_ingredientes = match source {
+        Cat::BPC =>  PathBuf::from("bpc_ingredientes_proc").with_extension("csv"),
+        Cat::Solares =>  PathBuf::from("solares_ingredientes_proc").with_extension("csv"),
+        Cat::Home =>  PathBuf::from("home_ingredientes_proc").with_extension("csv"),
+        Cat::Foods =>  PathBuf::from("foods_ingredientes_proc").with_extension("csv"),
+    };
     println!(
         "running...\n{}\n{}\n{}\n",
         dest_productos.display(),
