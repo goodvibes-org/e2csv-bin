@@ -26,7 +26,7 @@ struct Args {
     ingredients_sheet: String,
 }
 
-#[derive(Debug, Clone, clap::Subcommand)]
+#[derive(Debug, Clone, clap::Subcommand, Copy)]
 enum Cat {
     BPC,
     Solares,
@@ -36,7 +36,7 @@ enum Cat {
 
 fn main() {
     let clap_args = Args::parse();
-    println!("{:?}", clap_args);
+    println!("Parsed Arguments\n{:?}", clap_args);
     let file_productos = clap_args.productos;
     let file_ingredientes = clap_args.ingredientes;
     let sheet_ingredientes = clap_args.ingredients_sheet;

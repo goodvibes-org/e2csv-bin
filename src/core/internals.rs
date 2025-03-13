@@ -7,13 +7,20 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::vec;
 
+use super::translations::return_foods_mapping;
+
 pub(crate) fn write_range<W: Write>(
     dest: &mut W,
     range: Vec<Vec<Data>>,
     source: Source,
+    database: Cat,
 ) -> std::io::Result<()> {
     let delim = b'~';
-    let translations = return_mapping(source);
+    let translations = match database {
+        Cat::BPC | Cat::Home | Cat::Solares => return_mapping(source),
+        Cat::Foods => return_foods_mapping(source),
+    };
+
     let mut writeable_headers = vec![];
     let mut table = vec![];
     for (n, r) in range.into_iter().enumerate() {
@@ -21,11 +28,16 @@ pub(crate) fn write_range<W: Write>(
 
         // Header
         if n == 0 {
+            println!("\n\nThis is identified as the file header = \n{:?}\n", r);
             for (header_row_position, rowhead) in r.into_iter().enumerate() {
                 match rowhead {
                     Data::String(s) => {
                         // Change the header names
                         let tra = translations.get(&s);
+                        println!(
+                            "Header query for source {:?} {:?} => {} got {:?}",
+                            database, source, s, tra
+                        );
                         match tra {
                             Some(header) => {
                                 writeable_headers.push(header_row_position);
@@ -74,55 +86,49 @@ pub(crate) fn write_range<W: Write>(
         .for_each(|row| writer.write_record(row).unwrap());
     Ok(())
 }
-pub (crate) fn process_food_ingredient_file(range: &Range<Data>) -> Vec<Vec<Data>> {
-    let mut same_ingredient: Vec<&[Data]>  = vec![];
+pub(crate) fn process_food_ingredient_file(range: &Range<Data>) -> Vec<Vec<Data>> {
+    let mut same_ingredient: Vec<&[Data]> = vec![];
     let mut sinonimos_ingrediente = vec![];
-    let mut data   = vec![];
-    let instance_count = range.rows().len();
+    let mut data = vec![];
     for (n, instance) in range.rows().enumerate() {
-        println!("{} / {}", n, instance_count);
         // Quedan los headers, salteo el ultimo
-        if n.eq(&1) {
-            // Por la estupidez de como esta armado el archivo
-            continue;
-        }
         let row = instance;
         if n.eq(&0) {
             let mut headers = vec![];
             headers.extend_from_slice(row);
             headers.push(Data::String("sinonimos".to_owned()));
-        }
-        if (n +1 ).eq(&instance_count) {
-            println!("la que pienso que es last\n{:?}", row)
-        }
-        if row.into_iter().all(|text| text.is_empty())   {
-            let same_ingredient_clone = same_ingredient.clone();
-            for row in same_ingredient.clone() {
-                sinonimos_ingrediente.push(row.get(0).unwrap().to_owned());
-
-            }
-            if let Some(ingrediente) = same_ingredient_clone.first() {
-                let mut vec_ing = vec![];
-                vec_ing.extend_from_slice(ingrediente);
-                //  bulk_create_sinonimo_ingrediente(conn, sinonimos_ingrediente);
-                let mut sinonimos_string = String::new();
-                for ingrediente in sinonimos_ingrediente.clone() {
-                    sinonimos_string.push_str(&ingrediente.as_string().unwrap_or_default());
-                    sinonimos_string.push(';');
-                }
-                let sinonimos_column = Data::String(sinonimos_string);
-                vec_ing.push(sinonimos_column);
-                data.push(vec_ing);
-            }
-            same_ingredient.clear();
-            sinonimos_ingrediente.clear();
+            data.push(headers);
+        } else if n.eq(&1) {
+            // Por la estupidez de como esta armado el archivo
+            continue;
         } else {
-            same_ingredient.push(row);
+            if row.into_iter().all(|text| text.is_empty()) {
+                let same_ingredient_clone = same_ingredient.clone();
+                for row in same_ingredient.clone() {
+                    sinonimos_ingrediente.push(row.get(0).unwrap().to_owned());
+                }
+                if let Some(ingrediente) = same_ingredient_clone.first() {
+                    let mut vec_ing = vec![];
+                    vec_ing.extend_from_slice(ingrediente);
+                    //  bulk_create_sinonimo_ingrediente(conn, sinonimos_ingrediente);
+                    let mut sinonimos_string = String::new();
+                    for ingrediente in sinonimos_ingrediente.clone() {
+                        sinonimos_string.push_str(&ingrediente.as_string().unwrap_or_default());
+                        sinonimos_string.push(';');
+                    }
+                    let sinonimos_column = Data::String(sinonimos_string);
+                    vec_ing.push(sinonimos_column);
+                    data.push(vec_ing);
+                }
+                same_ingredient.clear();
+                sinonimos_ingrediente.clear();
+            } else {
+                same_ingredient.push(row);
+            }
         }
-
     }
     return data;
-} 
+}
 pub(crate) fn process_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>, Vec<Vec<Data>>) {
     let headers = range.headers().unwrap();
     let mut vec_ingredients = vec![];
@@ -150,13 +156,14 @@ pub(crate) fn process_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>, Vec
 
 pub(crate) fn process_food_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>, Vec<Vec<Data>>) {
     let headers = range.headers().unwrap();
+    println!("Headers =\n{:#?}", headers);
     let mut vec_ingredients = vec![];
     let mut vec_others = vec![];
     for r in range.rows() {
         let mut row_ingredients = vec![];
         let mut row_others = vec![];
         for (header, body) in headers.clone().into_iter().zip(r) {
-            let body = body.clone();
+            let body = body.clone(); // No se bien como ese truquito me dio los datos que estaban
             match header {
                 h if h.eq("Descripcion") => {
                     row_ingredients.push(body.clone());
@@ -170,9 +177,13 @@ pub(crate) fn process_food_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>
         vec_ingredients.push(row_ingredients);
         vec_others.push(row_others);
     }
+    println!(
+        "\n{:?}\n{:?}",
+        vec_ingredients.first().unwrap(),
+        vec_others.first().unwrap()
+    );
     return (vec_ingredients, vec_others);
 }
-
 
 pub(crate) fn process_ingredient_file(range: &Range<Data>) -> Vec<Vec<Data>> {
     let mut vec_ingredients = vec![];
@@ -213,13 +224,12 @@ pub(crate) fn convert_files(
         Cat::Home => PathBuf::from("home_productos_proc_ingredientes").with_extension("csv"),
         Cat::Solares => PathBuf::from("solares_productos_proc_ingredientes").with_extension("csv"),
         Cat::Foods => PathBuf::from("foods_productos_proc_ingredientes").with_extension("csv"),
-        
     };
     let dest_ingredientes = match source {
-        Cat::BPC =>  PathBuf::from("bpc_ingredientes_proc").with_extension("csv"),
-        Cat::Solares =>  PathBuf::from("solares_ingredientes_proc").with_extension("csv"),
-        Cat::Home =>  PathBuf::from("home_ingredientes_proc").with_extension("csv"),
-        Cat::Foods =>  PathBuf::from("foods_ingredientes_proc").with_extension("csv"),
+        Cat::BPC => PathBuf::from("bpc_ingredientes_proc").with_extension("csv"),
+        Cat::Solares => PathBuf::from("solares_ingredientes_proc").with_extension("csv"),
+        Cat::Home => PathBuf::from("home_ingredientes_proc").with_extension("csv"),
+        Cat::Foods => PathBuf::from("foods_ingredientes_proc").with_extension("csv"),
     };
     println!(
         "running...\n{}\n{}\n{}\n",
@@ -253,21 +263,24 @@ pub(crate) fn convert_files(
 
     // write_range(&mut dest, &range).unwrap();
     let (productos_ingredientes, productos) = match source {
-        Cat::BPC | Cat::Home | Cat::Solares =>  process_product_files(&range),
-        Cat::Foods => process_food_product_files(&range)
+        Cat::BPC | Cat::Home | Cat::Solares => process_product_files(&range),
+        Cat::Foods => process_food_product_files(&range),
     };
     let ingredientes = match source {
         Cat::BPC | Cat::Home | Cat::Solares => process_ingredient_file(&range_ing),
-        Cat::Foods => {
-            process_food_ingredient_file(&range_ing).into()
-        },
-    
+        Cat::Foods => process_food_ingredient_file(&range_ing).into(),
     };
-    let _ = write_range(&mut dest_productos, productos, Source::Products);
+    let _ = write_range(&mut dest_productos, productos, Source::Products, source);
     let _ = write_range(
         &mut dest_ingredientes_productos,
         productos_ingredientes,
         Source::Products,
+        source,
     );
-    let _ = write_range(&mut dest_ingredientes, ingredientes, Source::Ingredients);
+    let _ = write_range(
+        &mut dest_ingredientes,
+        ingredientes,
+        Source::Ingredients,
+        source,
+    );
 }
