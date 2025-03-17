@@ -13,9 +13,9 @@ pub fn return_foods_mapping(source: Source) -> HashMap<String, String> {
     "Valor Energetico/Kcal" =>"valor_energetico_kcal",
     "Valor Energetico/KJ" =>"valor_energetico_kj",
     "Valor Energetico/%VD" =>"valor_energetico_vd",
-    "Proteinas/g" =>"proteinas_vd",
+    "Proteinas/g" =>"proteinas_g",
     "Proteinas/%VD" =>"proteinas_vd",
-    "Fibra Alimentaria/g" =>"fibra_alimentaria",
+    "Fibra Alimentaria/g" =>"fibra_alimentaria_g",
     "Fibra Alimentaria/%VD" =>"fibra_alimentaria_vd",
     "Vitamina/ug" =>"vitaminas_ug",
     "Vitamina/%VD" =>"vitaminas_vd",
@@ -30,7 +30,7 @@ pub fn return_foods_mapping(source: Source) -> HashMap<String, String> {
     "Piridoxina o Vit. B6/mg" =>"pridoxina_mg",
     "Piridoxina o Vit. B6/%VD" =>"pridoxina_vd",
     "Vitamina B12/ug" =>"b12_ug",
-    "Vitamina B12/%VD" =>"b12_ug",
+    "Vitamina B12/%VD" =>"b12_vd",
     "Vitamina C/mg" =>"vitamina_c_mg",
     "Vitamina C/%VD" =>"vitamina_c_vd",
     "Vitaminas E_Tocoferol/mg" =>"tocoferol_mg",
@@ -114,6 +114,7 @@ pub fn return_foods_mapping(source: Source) -> HashMap<String, String> {
     "Aditivo 19" =>"aditivo_19"
     };
     let ingredient_mapping: HashMap<String, String> = hmap! {"Source" =>"source",
+        "" => "test",
         "Name" =>"name",
         "DDR." =>"ddr",
         "Toxicity (aditivos-alimentarios.com)" =>"toxicity_a",

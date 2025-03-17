@@ -36,7 +36,7 @@ enum Cat {
 
 fn main() {
     let clap_args = Args::parse();
-    println!("Parsed Arguments\n{:?}", clap_args);
+    println!("Parsed Argumentsz\n{:?}", clap_args);
     let file_productos = clap_args.productos;
     let file_ingredientes = clap_args.ingredientes;
     let sheet_ingredientes = clap_args.ingredients_sheet;

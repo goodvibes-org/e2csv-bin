@@ -1,6 +1,7 @@
 use crate::{return_mapping, Cat, Source};
 use calamine::{open_workbook_auto, DataType, Reader};
 use calamine::{Data, Range};
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
@@ -28,16 +29,11 @@ pub(crate) fn write_range<W: Write>(
 
         // Header
         if n == 0 {
-            println!("\n\nThis is identified as the file header = \n{:?}\n", r);
             for (header_row_position, rowhead) in r.into_iter().enumerate() {
                 match rowhead {
                     Data::String(s) => {
                         // Change the header names
                         let tra = translations.get(&s);
-                        println!(
-                            "Header query for source {:?} {:?} => {} got {:?}",
-                            database, source, s, tra
-                        );
                         match tra {
                             Some(header) => {
                                 writeable_headers.push(header_row_position);
@@ -45,6 +41,10 @@ pub(crate) fn write_range<W: Write>(
                             }
                             None => (),
                         }
+                    }
+                    Data::Empty => {
+                        writeable_headers.push(header_row_position);
+                        row_header.push("droppable".to_owned());
                     }
                     _ => row_header.push("".to_owned()),
                 }
@@ -87,6 +87,7 @@ pub(crate) fn write_range<W: Write>(
     Ok(())
 }
 pub(crate) fn process_food_ingredient_file(range: &Range<Data>) -> Vec<Vec<Data>> {
+    let mut lens = HashSet::new();
     let mut same_ingredient: Vec<&[Data]> = vec![];
     let mut sinonimos_ingrediente = vec![];
     let mut data = vec![];
@@ -118,6 +119,7 @@ pub(crate) fn process_food_ingredient_file(range: &Range<Data>) -> Vec<Vec<Data>
                     }
                     let sinonimos_column = Data::String(sinonimos_string);
                     vec_ing.push(sinonimos_column);
+                    lens.insert(vec_ing.len());
                     data.push(vec_ing);
                 }
                 same_ingredient.clear();
@@ -127,7 +129,7 @@ pub(crate) fn process_food_ingredient_file(range: &Range<Data>) -> Vec<Vec<Data>
             }
         }
     }
-    return data;
+        return data;
 }
 pub(crate) fn process_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>, Vec<Vec<Data>>) {
     let headers = range.headers().unwrap();
@@ -156,7 +158,6 @@ pub(crate) fn process_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>, Vec
 
 pub(crate) fn process_food_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>, Vec<Vec<Data>>) {
     let headers = range.headers().unwrap();
-    println!("Headers =\n{:#?}", headers);
     let mut vec_ingredients = vec![];
     let mut vec_others = vec![];
     for r in range.rows() {
@@ -177,11 +178,7 @@ pub(crate) fn process_food_product_files(range: &Range<Data>) -> (Vec<Vec<Data>>
         vec_ingredients.push(row_ingredients);
         vec_others.push(row_others);
     }
-    println!(
-        "\n{:?}\n{:?}",
-        vec_ingredients.first().unwrap(),
-        vec_others.first().unwrap()
-    );
+
     return (vec_ingredients, vec_others);
 }
 
@@ -266,6 +263,7 @@ pub(crate) fn convert_files(
         Cat::BPC | Cat::Home | Cat::Solares => process_product_files(&range),
         Cat::Foods => process_food_product_files(&range),
     };
+
     let ingredientes = match source {
         Cat::BPC | Cat::Home | Cat::Solares => process_ingredient_file(&range_ing),
         Cat::Foods => process_food_ingredient_file(&range_ing).into(),

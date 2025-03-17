@@ -1,7 +1,7 @@
 #[cfg(test)]
 pub mod tests {
-    use calamine::{open_workbook_auto, Reader};
     use calamine::Data;
+    use calamine::{open_workbook_auto, Reader};
 
     use crate::core::internals;
     #[test]
@@ -10,6 +10,7 @@ pub mod tests {
         let range = wb.worksheet_range("cortito").unwrap();
         let result: Vec<Vec<Data>> = internals::process_food_ingredient_file(&range);
         println!("[DEBUG] Header row: {:?}", result.clone().first().unwrap());
+        println!("{:#?}", result.clone().get(4).unwrap());
         for mut instance in result.clone() {
             instance.reverse();
             println!("[DEBUG] {:?}", instance.first().unwrap())
