@@ -1,2 +1,2 @@
-pub mod translations;
 pub mod internals;
+pub mod translations;
