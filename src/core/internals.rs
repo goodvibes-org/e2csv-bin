@@ -213,7 +213,7 @@ pub(crate) fn convert_files(
         Cat::BPC => PathBuf::from("bpc_productos_proc").with_extension("csv"),
         Cat::Solares => PathBuf::from("solares_productos_proc").with_extension("csv"),
         Cat::Home => PathBuf::from("home_productos_proc").with_extension("csv"),
-        Cat::Foods => PathBuf::from("foods_productos_proc").with_extension(".csv"),
+        Cat::Foods => PathBuf::from("foods_productos_proc").with_extension("csv"),
     };
 
     let dest_ingredientes_productos = match source {
